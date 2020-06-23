@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String FILENAME = "MainActivity.java";
     private static final String TAG = "Whack-A-Mole3.0!";
 
+    MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +41,42 @@ public class MainActivity extends AppCompatActivity {
 
         */
 
+        TextView newUser = findViewById(R.id.newUser);
+        newUser.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.v(TAG, FILENAME + ": Create new user!");
+                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
 
+        Button login = findViewById(R.id.buttonLogin);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText enterUsername = findViewById(R.id.enterUsername);
+                EditText enterPassword = findViewById(R.id.enterPassword);
+                Log.v(TAG, FILENAME + ": Logging in with: " + enterUsername.getText().toString() + ":" + enterPassword.getText().toString());
+
+                if (enterUsername != null && enterPassword != null){
+                    if (isValidUser(enterUsername.getText().toString(), enterPassword.getText().toString())){
+                        Log.v(TAG, FILENAME + ": Valid User! Logging in");
+                        Intent intent = new Intent(MainActivity.this, Main3Activity.class);
+                        intent.putExtra("Username", enterUsername.getText().toString());
+                        startActivity(intent);
+                    }
+                    else{
+                        Log.v(TAG, FILENAME + ": Invalid user!");
+                        Toast.makeText(MainActivity.this, "Invalid Username or Password", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "Please enter Username and Password", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     protected void onStop(){
@@ -54,7 +91,12 @@ public class MainActivity extends AppCompatActivity {
             Log.v(TAG, FILENAME + ": Running Checks..." + dbData.getMyUserName() + ": " + dbData.getMyPassword() +" <--> "+ userName + " " + password);
             You may choose to use this or modify to suit your design.
          */
-
+        UserData dbData = dbHandler.findUser(userName);
+        Log.v(TAG, FILENAME + ": Running Checks..." + dbData.getMyUserName() + ": " + dbData.getMyPassword() +" <--> "+ userName + " " + password);
+        if (dbData.getMyUserName().equals(userName) && dbData.getMyPassword().equals(password)){
+            return true;
+        }
+        else
+            return false;
     }
-
 }
